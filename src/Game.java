@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Game extends JPanel implements Runnable, MouseListener, MouseMotionListener, KeyListener, FocusListener {
-    double startTime;
     JFrame frame;
     public static void main(String[] args){
         new Game();
@@ -15,15 +14,21 @@ public class Game extends JPanel implements Runnable, MouseListener, MouseMotion
         // setup jpanel
         this.setBackground(Color.blue);
         this.setPreferredSize(new Dimension(800, 600));
+        this.setLayout(null);
+        initLabels();
+
 
         // setup frame
         frame = new JFrame("Plane Game");
-        frame.add(this, BorderLayout.CENTER);
+        frame.add(this);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setUndecorated(false);
         frame.pack();
+
+        frame.setResizable(false);
         frame.setVisible(true);
         frame.setTitle("Plane Game");
+
 
         // add listeners
         addMouseMotionListener(this);
@@ -31,12 +36,25 @@ public class Game extends JPanel implements Runnable, MouseListener, MouseMotion
         addKeyListener(this);
         setFocusable(true);
 
-        // init start time
-        this.startTime = (System.nanoTime() / 1_000_000_000.0);
 
 
         // run
         this.run();
+    }
+    public void initLabels(){
+        JLabel mainlbl = new JLabel("PLANE GAME");
+        mainlbl.setForeground(Color.WHITE);
+        mainlbl.setFont(new Font("Serif", Font.BOLD, 36));
+        mainlbl.setBounds(275, 100, 300, 300);
+        mainlbl.setVisible(true);
+        add(mainlbl);
+
+        JLabel lbl2 = new JLabel("Press any key to begin");
+        lbl2.setForeground(Color.WHITE);
+        lbl2.setFont(new Font("Serif", Font.BOLD, 20));
+        lbl2.setBounds(300, 137, 300, 300);
+        lbl2.setVisible(true);
+        add(lbl2);
     }
 
     @Override
