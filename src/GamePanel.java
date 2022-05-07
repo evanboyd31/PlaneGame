@@ -16,11 +16,13 @@ public class GamePanel extends JPanel implements ActionListener {
     static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
     static final int DELAY = 75;
-    int playerX = 0;
-    int playerY = 0;
+    int playerX = SCREEN_WIDTH / 2 - 32;
+    int playerY = SCREEN_HEIGHT - 64;
+    int enemyX = SCREEN_WIDTH / 2 - 32;
+    int enemyY = -100;
     int bulletX = playerX + 16;
     int bulletY = playerY + 5;
-    char direction = 'R'; //U, D, L, R
+    char direction = ' '; //U, D, L, R
     boolean running = false;
     boolean playerWelcomed = false;
     boolean bulletFiring = false;
@@ -28,6 +30,7 @@ public class GamePanel extends JPanel implements ActionListener {
     Random random;
     JLabel planeLabel;
     JLabel bulletLabel;
+    JLabel enemyLabel;
 
     GamePanel() {
         random = new Random();
@@ -35,7 +38,6 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setBackground(new Color(66, 135, 245));
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
-        //startGame();
     }
 
     public void startGame() {
@@ -59,15 +61,17 @@ public class GamePanel extends JPanel implements ActionListener {
 
             //this.add(picLabel, x[0], y[0]);
             planeLabel.setLocation(playerX, playerY);
-            if(bulletFiring){
-                bulletY -= 20;
+            if (bulletFiring) {
+                bulletY -= 5;
             }
-            if(bulletY < 0){
+            if (bulletY < 0) {
                 bulletFiring = false;
                 bulletX = playerX + 16;
                 bulletY = playerY + 5;
             }
             bulletLabel.setLocation(bulletX, bulletY);
+            enemyY += 1;
+            enemyLabel.setLocation(enemyX, enemyY);
             this.revalidate();
             this.repaint();
 
@@ -97,25 +101,25 @@ public class GamePanel extends JPanel implements ActionListener {
         switch (direction) {
             case 'U':
                 playerY -= UNIT_SIZE;
-                if(!bulletFiring){
+                if (!bulletFiring) {
                     bulletY -= UNIT_SIZE;
                 }
                 break;
             case 'D':
                 playerY += UNIT_SIZE;
-                if(!bulletFiring){
+                if (!bulletFiring) {
                     bulletY += UNIT_SIZE;
                 }
                 break;
             case 'L':
                 playerX -= UNIT_SIZE;
-                if(!bulletFiring){
+                if (!bulletFiring) {
                     bulletX -= UNIT_SIZE;
                 }
                 break;
             case 'R':
                 playerX += UNIT_SIZE;
-                if(!bulletFiring){
+                if (!bulletFiring) {
                     bulletX += UNIT_SIZE;
                 }
                 break;
@@ -124,13 +128,6 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    public void checkApple() {
-//        if ((x[0] == appleX) && (y[0] == appleY)) {
-//            bodyParts++;
-//            applesEaten++;
-//            newApple();
-//        }
-    }
 
     public void checkCollisions() {
 
@@ -138,30 +135,39 @@ public class GamePanel extends JPanel implements ActionListener {
         // check if head touches left border
         if (playerX < 0) {
             playerX = 0;
+            bulletX = playerX + 16;
         }
 
         // right border
         if (playerX > SCREEN_WIDTH - 64) {
             playerX = SCREEN_WIDTH - 64;
+            bulletX = playerX + 16;
         }
 
         // top border
         if (playerY < 0) {
             playerY = 0;
+            bulletY = playerY + 5;
         }
 
         // bottom border
         if (playerY > SCREEN_HEIGHT - 64) {
             playerY = SCREEN_HEIGHT - 64;
+            bulletY = playerY + 5;
         }
 
-//        hit_detection(enemyX, enemyY, bulletX, bulletY){
-//            double distance = Math.sqrt((Math.pow((enemyX - bulletX), 2)) + (Math.pow((enemyY - bulletY), 2)));
-//            if distance < 35:
-//            return true;
-//        else:
-//            return false;
-//        }
+
+        double distance = Math.sqrt((Math.pow((enemyX - bulletX), 2)) + (Math.pow((enemyY - bulletY), 2)));
+        if (distance < 64) {
+            enemyX = random.nextInt(SCREEN_WIDTH - 64);
+            enemyY = -100;
+            bulletFiring = false;
+            bulletX = playerX + 16;
+            bulletY = playerY + 5;
+        }
+        if (enemyY > SCREEN_HEIGHT - 64) {
+            running = false;
+        }
 
         if (!running) {
             timer.stop();
@@ -169,8 +175,26 @@ public class GamePanel extends JPanel implements ActionListener {
 
     }
 
+    public void clear() {
+        this.remove(planeLabel);
+        this.remove(enemyLabel);
+        this.remove(bulletLabel);
+    }
+
+    public void reset() {
+        playerX = SCREEN_WIDTH / 2 - 32;
+        playerY = SCREEN_HEIGHT - 64;
+        enemyX = SCREEN_WIDTH / 2 - 32;
+        enemyY = -100;
+        bulletX = playerX + 16;
+        bulletY = playerY + 5;
+        direction = ' '; //U, D, L, R
+        bulletFiring = false;
+    }
+
     public void gameOver(Graphics g) {
         //Game over text
+        clear();
         g.setColor(Color.white);
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
         FontMetrics metrics1 = getFontMetrics(g.getFont());
@@ -199,12 +223,15 @@ public class GamePanel extends JPanel implements ActionListener {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        if(fileName.equals("src/aircraft.png")){
+        if (fileName.equals("src/aircraft.png")) {
             planeLabel = new JLabel(new ImageIcon(myPicture));
             this.add(planeLabel);
-        }else if(fileName.equals("src/bullet.png")){
+        } else if (fileName.equals("src/bullet.png")) {
             bulletLabel = new JLabel(new ImageIcon(myPicture));
             this.add(bulletLabel);
+        } else if (fileName.equals("src/plane.png")) {
+            enemyLabel = new JLabel(new ImageIcon(myPicture));
+            this.add(enemyLabel);
         }
 
     }
@@ -213,7 +240,6 @@ public class GamePanel extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (running) {
             move();
-            checkApple();
             checkCollisions();
         }
         repaint();
@@ -254,12 +280,14 @@ public class GamePanel extends JPanel implements ActionListener {
                 case KeyEvent.VK_SPACE:
                     if (running) {
                         bulletFiring = true;
-                    }else{
+                    } else {
+                        reset();
                         running = true;
                         playerWelcomed = true;
                         startGame();
                         addImage("src/aircraft.png");
                         addImage("src/bullet.png");
+                        addImage("src/plane.png");
                         System.out.println(running);
                     }
                     break;
