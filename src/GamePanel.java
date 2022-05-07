@@ -11,7 +11,7 @@ import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
 
-    static final int SCREEN_WIDTH = 900;
+    static final int SCREEN_WIDTH = 700;
     static final int SCREEN_HEIGHT = 600;
     static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
@@ -26,6 +26,7 @@ public class GamePanel extends JPanel implements ActionListener {
     boolean running = false;
     boolean playerWelcomed = false;
     boolean bulletFiring = false;
+    int score = 0;
     Timer timer;
     Random random;
     JLabel planeLabel;
@@ -62,7 +63,7 @@ public class GamePanel extends JPanel implements ActionListener {
             //this.add(picLabel, x[0], y[0]);
             planeLabel.setLocation(playerX, playerY);
             if (bulletFiring) {
-                bulletY -= 5;
+                bulletY -= 2.5;
             }
             if (bulletY < 0) {
                 bulletFiring = false;
@@ -76,16 +77,13 @@ public class GamePanel extends JPanel implements ActionListener {
             this.repaint();
 
             g.setColor(Color.white);
-            g.setFont(new Font("Ink Free", Font.BOLD, 25));
+            g.setFont(new Font("Arial", Font.BOLD, 25));
             FontMetrics metrics = getFontMetrics(g.getFont());
-            // g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2, g.getFont().getSize());
+            g.drawString("Score: " + score, (SCREEN_WIDTH - metrics.stringWidth("Score: " + score)) / 2, g.getFont().getSize());
         } else {
             if (!playerWelcomed) {
                 welcomeScreen(g);
             } else {
-                direction = 'R'; //U, D, L, R
-                playerX = 0;
-                playerY = 0;
                 gameOver(g);
             }
         }
@@ -135,35 +133,45 @@ public class GamePanel extends JPanel implements ActionListener {
         // check if head touches left border
         if (playerX < 0) {
             playerX = 0;
-            bulletX = playerX + 16;
+            if (!bulletFiring) {
+                bulletX = playerX + 16;
+            }
         }
 
         // right border
         if (playerX > SCREEN_WIDTH - 64) {
             playerX = SCREEN_WIDTH - 64;
-            bulletX = playerX + 16;
+            if (!bulletFiring) {
+                bulletX = playerX + 16;
+            }
+
         }
 
         // top border
         if (playerY < 0) {
             playerY = 0;
-            bulletY = playerY + 5;
+            if (!bulletFiring) {
+                bulletY = playerY + 5;
+            }
         }
 
         // bottom border
         if (playerY > SCREEN_HEIGHT - 64) {
             playerY = SCREEN_HEIGHT - 64;
-            bulletY = playerY + 5;
+            if (!bulletFiring) {
+                bulletY = playerY + 5;
+            }
         }
 
 
         double distance = Math.sqrt((Math.pow((enemyX - bulletX), 2)) + (Math.pow((enemyY - bulletY), 2)));
-        if (distance < 64) {
+        if (distance < 64 && bulletFiring) {
             enemyX = random.nextInt(SCREEN_WIDTH - 64);
             enemyY = -100;
             bulletFiring = false;
             bulletX = playerX + 16;
             bulletY = playerY + 5;
+            score++;
         }
         if (enemyY > SCREEN_HEIGHT - 64) {
             running = false;
@@ -190,19 +198,20 @@ public class GamePanel extends JPanel implements ActionListener {
         bulletY = playerY + 5;
         direction = ' '; //U, D, L, R
         bulletFiring = false;
+        score = 0;
     }
 
     public void gameOver(Graphics g) {
         //Game over text
         clear();
         g.setColor(Color.white);
-        g.setFont(new Font("Ink Free", Font.BOLD, 75));
+        g.setFont(new Font("Arial", Font.BOLD, 75));
         FontMetrics metrics1 = getFontMetrics(g.getFont());
         g.drawString("Game over", (SCREEN_WIDTH - metrics1.stringWidth("Game over")) / 2, SCREEN_HEIGHT / 2);
         g.setColor(Color.white);
-        g.setFont(new Font("Ink Free", Font.BOLD, 25));
+        g.setFont(new Font("Arial", Font.BOLD, 25));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
-        //g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics2.stringWidth("Score: " + applesEaten)) / 2, g.getFont().getSize());
+        g.drawString("Score: " + score, (SCREEN_WIDTH - metrics2.stringWidth("Score: " + score)) / 2, g.getFont().getSize());
     }
 
     public void welcomeScreen(Graphics g) {
