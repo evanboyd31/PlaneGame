@@ -5,8 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
@@ -181,7 +180,7 @@ public class GamePanel extends JPanel implements ActionListener {
             running = false;
         }
 
-        if(cloudY > SCREEN_HEIGHT - 64){
+        if (cloudY > SCREEN_HEIGHT - 64) {
             newCloud();
         }
 
@@ -212,7 +211,7 @@ public class GamePanel extends JPanel implements ActionListener {
         score = 0;
     }
 
-    public void gameOver(Graphics g) {
+    public void gameOver(Graphics g) throws IOException {
         //Game over text
         clear();
         g.setColor(Color.white);
@@ -223,7 +222,29 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setFont(new Font("Arial", Font.BOLD, 25));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
         g.drawString("Score: " + score, (SCREEN_WIDTH - metrics2.stringWidth("Score: " + score)) / 2, g.getFont().getSize());
+
+        int highScore = getHighScore();
+        if (score > highScore) {
+            addNewHighScore(score);
+            g.setColor(Color.green);
+            g.setFont(new Font("Arial", Font.BOLD, 25));
+            FontMetrics metrics3 = getFontMetrics(g.getFont());
+            g.drawString("New High Score!", (SCREEN_WIDTH - metrics3.stringWidth("New High Score!")) / 2, SCREEN_HEIGHT / 2 + g.getFont().getSize());
+
+            g.setColor(Color.white);
+            g.setFont(new Font("Arial", Font.BOLD, 25));
+            FontMetrics metrics4 = getFontMetrics(g.getFont());
+            g.drawString("High Score: " + score, (SCREEN_WIDTH - metrics4.stringWidth("High Score: " + score)) / 2, SCREEN_HEIGHT / 2 + g.getFont().getSize() + g.getFont().getSize());
+        } else {
+            g.setColor(Color.white);
+            g.setFont(new Font("Arial", Font.BOLD, 25));
+            FontMetrics metrics3 = getFontMetrics(g.getFont());
+            g.drawString("High Score: " + highScore, (SCREEN_WIDTH - metrics3.stringWidth("High Score: " + highScore)) / 2, SCREEN_HEIGHT / 2 + g.getFont().getSize());
+        }
+
+
     }
+
 
     public void welcomeScreen(Graphics g) {
         g.setColor(Color.white);
@@ -257,6 +278,38 @@ public class GamePanel extends JPanel implements ActionListener {
             this.add(cloudLabel);
         }
 
+    }
+
+    public int getHighScore() {
+        String line = null;
+        File file = new File("src/highScores.txt");
+        int highScore = 0;
+
+        FileReader fr = null;
+        try {
+            fr = new FileReader(file);
+        } catch (FileNotFoundException e) {
+            System.out.println("File doesn't exists");
+            e.printStackTrace();
+        }
+        BufferedReader br = new BufferedReader(fr);
+
+        try {
+            while ((line = br.readLine()) != null) {
+                if (Integer.parseInt(line) > highScore) {
+                    highScore = Integer.parseInt(line);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return highScore;
+    }
+
+    public void addNewHighScore(int newScore) throws IOException {
+        PrintWriter wr = new PrintWriter(new FileWriter("src/highScores.txt"));
+        wr.println(newScore);
+        wr.close();
     }
 
     @Override
