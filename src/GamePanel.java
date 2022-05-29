@@ -14,7 +14,6 @@ public class GamePanel extends JPanel implements ActionListener {
     static final int SCREEN_WIDTH = 700;
     static final int SCREEN_HEIGHT = 600;
     static final int UNIT_SIZE = 25;
-    static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
     static final int DELAY = 75;
     int playerX = SCREEN_WIDTH / 2 - 32;
     int playerY = SCREEN_HEIGHT - 64;
@@ -22,6 +21,8 @@ public class GamePanel extends JPanel implements ActionListener {
     int enemyY = -100;
     int bulletX = playerX + 16;
     int bulletY = playerY + 5;
+    int cloudX = SCREEN_WIDTH / 2 - 32;
+    int cloudY = -400;
     char direction = ' '; //U, D, L, R
     boolean running = false;
     boolean playerWelcomed = false;
@@ -32,6 +33,8 @@ public class GamePanel extends JPanel implements ActionListener {
     JLabel planeLabel;
     JLabel bulletLabel;
     JLabel enemyLabel;
+    JLabel cloudLabel;
+
 
     GamePanel() {
         random = new Random();
@@ -58,7 +61,8 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public void draw(Graphics g) throws IOException {
         if (running) {
-
+            cloudY += 1;
+            cloudLabel.setLocation(cloudX, cloudY);
 
             //this.add(picLabel, x[0], y[0]);
             planeLabel.setLocation(playerX, playerY);
@@ -90,10 +94,10 @@ public class GamePanel extends JPanel implements ActionListener {
 
     }
 
-//    public void newApple() {
-//        appleX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
-//        appleY = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
-//    }
+    public void newCloud() {
+        cloudX = random.nextInt(0, 636);
+        cloudY = random.nextInt(-300, -50);
+    }
 
     public void move() {
         switch (direction) {
@@ -177,6 +181,10 @@ public class GamePanel extends JPanel implements ActionListener {
             running = false;
         }
 
+        if(cloudY > SCREEN_HEIGHT - 64){
+            newCloud();
+        }
+
         if (!running) {
             timer.stop();
         }
@@ -187,6 +195,7 @@ public class GamePanel extends JPanel implements ActionListener {
         this.remove(planeLabel);
         this.remove(enemyLabel);
         this.remove(bulletLabel);
+        this.remove(cloudLabel);
     }
 
     public void reset() {
@@ -196,6 +205,8 @@ public class GamePanel extends JPanel implements ActionListener {
         enemyY = -100;
         bulletX = playerX + 16;
         bulletY = playerY + 5;
+        cloudX = SCREEN_WIDTH / 2 - 32;
+        cloudY = -400;
         direction = ' '; //U, D, L, R
         bulletFiring = false;
         score = 0;
@@ -241,6 +252,9 @@ public class GamePanel extends JPanel implements ActionListener {
         } else if (fileName.equals("src/plane.png")) {
             enemyLabel = new JLabel(new ImageIcon(myPicture));
             this.add(enemyLabel);
+        } else if (fileName.equals("src/cloud.png")) {
+            cloudLabel = new JLabel(new ImageIcon(myPicture));
+            this.add(cloudLabel);
         }
 
     }
@@ -297,7 +311,7 @@ public class GamePanel extends JPanel implements ActionListener {
                         addImage("src/aircraft.png");
                         addImage("src/bullet.png");
                         addImage("src/plane.png");
-                        System.out.println(running);
+                        addImage("src/cloud.png");
                     }
                     break;
             }
